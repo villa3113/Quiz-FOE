@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz FOE - Cuestionario Interactivo</title>
+    <style>
+        :root {
+            --color-primary: #2563eb;
+            --color-success: #10b981;
+            --color-error: #ef4444;
+            --color-warning: #f59e0b;
+            --color-bg: #0f172a;
+            --color-surface: #1e293b;
+            --color-text: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px 0;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--color-primary);
+        }
+
+        header p {
+            color: var(--color-text-secondary);
+            font-size: 1.1em;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            font-size: 1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--color-surface);
+            color: var(--color-text);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .quiz-container {
+            background: var(--color-surface);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .quiz-header h2 {
+            font-size: 1.3em;
+            color: var(--color-primary);
+        }
+
+        .quiz-counter {
+            background: var(--color-primary);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            padding: 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+            font-size: 1.05em;
+        }
+
+        .option:hover {
+            border-color: var(--color-primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .option input[type="radio"] {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .option.selected {
+            border-color: var(--color-primary);
+            background: rgba(37, 99, 235, 0.15);
+        }
+
+        .option.correct {
+            border-color: var(--color-success);
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--color-success);
+        }
+
+        .option.incorrect {
+            border-color: var(--color-error);
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--color-error);
+        }
+
+        .feedback {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--color-success);
+            border-left: 4px solid var(--color-success);
+        }
+
+        .feedback.incorrect {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--color-error);
+            border-left: 4px solid var(--color-error);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .results-container {
+            background: var(--color-surface);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .results-container h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: var(--color-primary);
+        }
+
+        .score-display {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 30px 0;
+            color: var(--color-success);
+        }
+
+        .score-percentage {
+            font-size: 1.5em;
+            color: var(--color-text-secondary);
+            margin-bottom: 30px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .stat-card h3 {
+            color: var(--color-text-secondary);
+            font-size: 0.9em;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .failed-questions {
+            text-align: left;
+            margin: 40px 0;
+            padding: 20px;
+            background: rgba(239, 68, 68, 0.05);
+            border: 2px solid var(--color-error);
+            border-radius: 8px;
+        }
+
+        .failed-questions h3 {
+            color: var(--color-error);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .failed-question-item {
+            padding: 10px;
+            margin: 10px 0;
+            background: rgba(255, 255, 255, 0.02);
+            border-left: 4px solid var(--color-error);
+            border-radius: 4px;
+        }
+
+        .failed-question-text {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--color-text);
+        }
+
+        .failed-question-answer {
+            font-size: 0.9em;
+            color: var(--color-text-secondary);
+        }
+
+        .home-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .welcome-message {
+            font-size: 1.2em;
+            color: var(--color-text-secondary);
+            text-align: center;
+            max-width: 600px;
+        }
+
+        .main-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .main-buttons .btn {
+            padding: 15px 40px;
+            font-size: 1.1em;
+        }
+
+        .info-box {
+            background: rgba(37, 99, 235, 0.1);
+            border: 2px solid var(--color-primary);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .info-box p {
+            color: var(--color-text-secondary);
+            font-size: 0.95em;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📚 Quiz FOE</h1>
+            <p>Cuestionario Interactivo - Finanzas y Organizaciones</p>
+        </header>
+
+        <!-- Home Screen -->
+        <div id="homeScreen" class="home-screen">
+            <div class="welcome-message">
+                <p>Bienvenido al Quiz FOE. Elige cómo deseas practicar:</p>
+            </div>
+            <div class="main-buttons">
+                <button class="btn btn-primary" onclick="startQuiz()">Nuevo Quiz Completo</button>
+                <button class="btn btn-secondary" onclick="showFailedOnly()" id="retryFailedBtn">Preguntas Fallidas</button>
+            </div>
+            <div class="info-box">
+                <p>✨ Las preguntas se aleatorizan en cada intento<br>
+                ✨ Las opciones de respuesta también se mezclan<br>
+                ✨ Registramos tus fallos para que practiques (se guardan en este navegador)</p>
+            </div>
+        </div>
+
+        <!-- Quiz Container -->
+        <div id="quizScreen" class="quiz-container hidden">
+            <div class="quiz-header">
+                <h2 id="quizMode">Quiz Completo</h2>
+                <div class="quiz-counter">
+                    <span id="currentQuestion">1</span> / <span id="totalQuestions">0</span>
+                </div>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+            <div class="question-text" id="questionText"></div>
+            <div class="options" id="options"></div>
+
+            <div class="quiz-buttons">
+                <button class="btn btn-primary" id="submitBtn" onclick="submitAnswer()">Enviar Respuesta</button>
+                <button class="btn btn-secondary" id="nextBtn" onclick="nextQuestion()" style="display:none;">Siguiente</button>
+                <button class="btn btn-secondary" onclick="backHome()">Volver al Inicio</button>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="results-container hidden">
+            <h2>¡Quiz Completado!</h2>
+            <div class="score-display" id="scoreDisplay">0/0</div>
+            <div class="score-percentage" id="scorePercentage">0%</div>
+
+            <div class="stats">
+                <div class="stat-card">
+                    <h3>Correctas</h3>
+                    <div class="value" id="correctCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Incorrectas</h3>
+                    <div class="value" id="incorrectCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Tasa de Éxito</h3>
+                    <div class="value" id="successRate">0%</div>
+                </div>
+            </div>
+
+            <div id="failedQuestionsSection" class="failed-questions hidden">
+                <h3>❌ Preguntas Fallidas</h3>
+                <div id="failedQuestionsList"></div>
+            </div>
+
+            <div class="quiz-buttons" style="margin-top: 40px;">
+                <button class="btn btn-primary" onclick="startQuiz()">Intentar de Nuevo</button>
+                <button class="btn btn-success" id="retryFailedQuizBtn" onclick="showFailedOnly()" style="display: none;">Solo Preguntas Fallidas</button>
+                <button class="btn btn-secondary" onclick="backHome()">Volver al Inicio</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de preguntas (las tuyas; aquí solo dejo algunas a modo de ejemplo)
+        const questions = [
+    {
+        id: 1,
+        text: "Qué es dirigir para el pensamiento sistémico?",
+        options: ["Analizar, planificar, ejecutar, controlar", "Planificar sin considerar el control", "Controlar mediante toma de decisiones reactiva", "Ejecutar planes sin análisis previo"],
+        correct: 0
+    },
+    {
+        id: 2,
+        text: "Cual de las siguientes es un motivo por el que las decisiones no son obvias?",
+        options: ["No se conoce con certeza la evolución", "Se conocen todas las relaciones entre elementos", "Las variables son todas de naturaleza similar", "Existe escasa relación causa-efecto entre variables"],
+        correct: 0
+    },
+    {
+        id: 3,
+        text: "Que es el pensamiento sistemico?",
+        options: ["Principios y técnicas para ver el mundo como sistemas", "La capacidad de analizar un problema de forma aislada", "Un método que se centra solo en síntomas visibles", "Un enfoque que ignora las interconexiones entre elementos"],
+        correct: 0
+    },
+    {
+        id: 4,
+        text: "En el enfoque sintético…",
+        options: ["Síntesis precede a analisis", "Análisis precede a síntesis", "Se desciende de arriba hacia abajo en la estructura", "Se ignoran los niveles superiores del sistema"],
+        correct: 0
+    },
+    {
+        id: 5,
+        text: "Qué produce la solución fácil",
+        options: ["Efectos compensatorios", "Solución permanente del problema", "Impacto único y positivo en el sistema", "Resolución inmediata sin consecuencias adversas"],
+        correct: 0
+    },
+    {
+        id: 6,
+        text: "Cuál de las siguientes NO es una actitud no sistémica",
+        options: ["Impaciencia", "Insensibilidad al cambio", "Cobardía directiva", "Demora"],
+        correct: 0
+    },
+    {
+        id: 7,
+        text: "Cuando se deberia sospechar de bucle positivo",
+        options: ["Cusando las variaciones se refuerzan", "Cuando las variaciones se anulan", "Cuando el sistema permanece en equilibrio", "Cuando no hay cambios en las variables"],
+        correct: 0
+    },
+    {
+        id: 8,
+        text: "Cuándo se deberia sospechar de bucle negativo",
+        options: ["Cuando las variaciones se compensan", "Cuando las variaciones se refuerzan continuamente", "Cuando el sistema crece sin control", "Cuando no existe retroalimentación"],
+        correct: 0
+    },
+    {
+        id: 9,
+        text: "Cómo se llama el factor que provoca la correccion en un bucle negativo",
+        options: ["Condición limitadora", "Factor de amplificación", "Elemento acelerador", "Punto de ruptura sistémica"],
+        correct: 0
+    },
+    {
+        id: 10,
+        text: "Qué provoca el bucle negativo",
+        options: ["Estabilización", "Divergencia continua", "Crecimiento exponencial", "Amplificación de variaciones"],
+        correct: 0
+    },
+    {
+        id: 11,
+        text: "Qué arquetipo sistémico se consigue al no actuar sobre la carga real",
+        options: ["Desplazamiento de la carga", "Eliminación de la carga", "Distribución equitativa de la carga", "Absorción total de la carga"],
+        correct: 0
+    },
+    {
+        id: 12,
+        text: "Qué arquetipo sistémico se consigue al conformarse con menos para reducir la tensión",
+        options: ["Erosión de metas", "Escalada de objetivos", "Reajuste permanente de metas", "Multiplicación de aspiraciones"],
+        correct: 0
+    },
+    {
+        id: 13,
+        text: "Qué herramienta describe la capacidad de generar riqueza",
+        options: ["La cuenta de resultados", "El balance de situación", "La tesorería", "Las ratios financieras"],
+        correct: 0
+    },
+    {
+        id: 14,
+        text: "Qué herramienta describe la situación patrimonial de la empresa",
+        options: ["El balance de situación", "La cuenta de resultados", "La tesorería", "Las ratios financieras"],
+        correct: 0
+    },
+    {
+        id: 15,
+        text: "Qué herramienta describe la capacidad de generar dinero",
+        options: ["La tesorería", "La cuenta de resultados", "El balance de situación", "Las ratios financieras"],
+        correct: 0
+    },
+    {
+        id: 16,
+        text: "Qué herramienta describe la salud económica",
+        options: ["Las ratios financieras", "La cuenta de resultados", "El balance de situación", "La tesorería"],
+        correct: 0
+    },
+    {
+        id: 17,
+        text: "Cual de estos tipos de activo describe los activos físicos",
+        options: ["Existencias", "Realizables", "Disponibles", "Convertibles"],
+        correct: 0
+    },
+    {
+        id: 18,
+        text: "Cual de estos activos describe la deuda pública",
+        options: ["Realizables", "Existencias", "Disponibles", "Convertibles"],
+        correct: 0
+    },
+    {
+        id: 19,
+        text: "Como se consideran unos terrenos en cuanto al tipo de activo",
+        options: ["Inmovilizado material", "Inmovilizado financiero", "Existencia", "Realizable"],
+        correct: 0
+    },
+    {
+        id: 20,
+        text: "Como se divide el pasivo en cuanto a la procedencia",
+        options: ["Interna y externa", "Propio y ajeno", "Corriente y permanente", "Capital y deuda"],
+        correct: 0
+    },
+    {
+        id: 21,
+        text: "Como se considera la deuda no corriente",
+        options: ["Ajena, externa y capital permanente", "Ajena, interna y capital permanente", "Ajena, externa y pasivo corriente", "Propia, externa y pasivo corriente"],
+        correct: 0
+    },
+    {
+        id: 22,
+        text: "Como se considera el capital social",
+        options: ["Propio, externo y capital permanente", "Ajeno, externo y capital permanente", "Propio, interno y capital permanente", "Ajeno, interno y capital permanente"],
+        correct: 0
+    },
+    {
+        id: 23,
+        text: "En una empresa con 100 AC, 130 ANC, 40 PC, 190 CP, cual es su fondo de rotación",
+        options: ["60", "30", "150", "90"],
+        correct: 0
+    },
+    {
+        id: 24,
+        text: "Existe un valor óptimo de fondo de rotación?",
+        options: ["No", ">1", "Cuanto mas alto mejor", "60"],
+        correct: 0
+    },
+    {
+        id: 25,
+        text: "Cuanto menor sea el \"Ciclo de Maduración\"…",
+        options: ["Menor necesidad de alto FR", "Más necesidad de alto FR", "Depende de la actividad de la empresa", "No depende de eso"],
+        correct: 0
+    },
+    {
+        id: 26,
+        text: "Como se calcula la cuenta de perdidas y ganancias",
+        options: ["Ingresos - gastos en un periodo", "Ingreso - gastos en el momento", "Cobros - pagos en un periodo", "Cobros - gastos en un periodo"],
+        correct: 0
+    },
+    {
+        id: 27,
+        text: "Qué se genera cuando hay beneficio en la cuenta de pérdidas y ganancias",
+        options: ["Riqueza", "Dinero", "Activos", "Pasivos"],
+        correct: 0
+    },
+    {
+        id: 28,
+        text: "Cómo se calcula el dinero final en la tesorería",
+        options: ["Dinero inicial + cobros periodo - pagos periodo", "Cobros periodo - Pagos periodo", "Dinero inicial + Beneficio", "Ingresos - Gastos"],
+        correct: 0
+    },
+    {
+        id: 29,
+        text: "Qué diferencia hay entre ingresos y cobros",
+        options: ["El ingreso genera riqueza y el cobro dinero", "Son lo mismo", "El ingreso genera dinero y el cobro riqueza", "El ingreso es instantáneo y el cobro puede venir más tarde"],
+        correct: 0
+    },
+    {
+        id: 30,
+        text: "Qué diferentes flujos tiene la tesorería",
+        options: ["Flujo de explotación, inversión y financiero", "Flujo de entrada y salida de dinero", "Flujo operativo e inversión", "Flujo corriente y flujo futuro"],
+        correct: 0
+    },
+    {
+        id: 31,
+        text: "Qué intervalo tiene el ratio de liquidez",
+        options: ["1.5 - 2", "1 - 1.5", ">1.67", "<1.5"],
+        correct: 0
+    },
+    {
+        id: 32,
+        text: "Qué intervalo tiene el ratio de tesorería",
+        options: ["1 - 1.5", "1.5 - 2", ">1.67", "<1.5"],
+        correct: 0
+    },
+    {
+        id: 33,
+        text: "Qué intervalo tiene el ratio de endeudamiento",
+        options: [">1.67", "1 - 1.5", "1.5 - 2", "<1.5"],
+        correct: 0
+    },
+    {
+        id: 34,
+        text: "Qué intervalo tiene el ratio de garantía",
+        options: ["<1.5", "1 - 1.5", ">1.67", "1.5 - 2"],
+        correct: 0
+    },
+    {
+        id: 35,
+        text: "Qué valor es óptimo para el ratio de liquidez",
+        options: ["Depende de la empresa", "Entre 1.5 y 2", "Menor que 1", "Cuanto más alto mejor"],
+        correct: 0
+    },
+    {
+        id: 36,
+        text: "Que representa el ratio de tesorería",
+        options: ["Capacidad de hacer frente a los pagos a c/p sin tener en cuenta las existencias", "Capacidad de hacer frente a los pagos a c/p con el activo corriente", "Capacidad de hacer frente a los pagos a l/p con el activo corriente", "Activo corriente / Pasivo corriente"],
+        correct: 0
+    },
+    {
+        id: 37,
+        text: "Qué es el ROA",
+        options: ["Beneficio bruto / Activo", "Beneficio bruto / Ingresos por ventas", "Ingresos por ventas / Activo", "Beneficio neto / Patrimonio neto"],
+        correct: 0
+    },
+    {
+        id: 38,
+        text: "Cuándo se considera que se está cercano a la quiebra",
+        options: ["Cuando el ratio de endeudamiento es demasiado alto", "Cuando el ratio de garantia es menor a 1", "Cuando el ratio de liquidez es demasiado bajo", "Cuando el ratio de tesorería es demasiado bajo"],
+        correct: 0
+    },
+    {
+        id: 39,
+        text: "Para que sirve el ROA",
+        options: ["Para comparar empresas", "Para complementar a la liquidez", "Para identificar el estado financiero de una empresa", "Para comparar con el coste de oportunidad"],
+        correct: 0
+    },
+    {
+        id: 40,
+        text: "Qué es una rotación de activo",
+        options: ["Ingresos por ventas / Activo", "Beneficio bruto / Ingresos por ventas", "Beneficio bruto / Activo", "Beneficio neto / Patrimonio neto"],
+        correct: 0
+    },
+    {
+        id: 41,
+        text: "Como NO se puede incrementar el ROA",
+        options: ["Incrementando el pasivo", "Incrementando la rotación", "Incrementando el margen", "Incrementando la rotación y el margen"],
+        correct: 0
+    },
+    {
+        id: 42,
+        text: "Qué representa el ROE",
+        options: ["La rentabilidad para el accionista", "El estado financiero de la empresa", "El índice de ventas", "El apalancamiento financiero"],
+        correct: 0
+    },
+    {
+        id: 43,
+        text: "Qué hay que hacer si el ROA es mayor que el tipo de interes de la deuda",
+        options: ["Aumentar el endeudamiento, lo que aumenta el ROE", "Disminuir el endeudamiento, lo que aumenta el ROE", "Aumentar el endeudamiento, lo que disminuye el ROE", "Disminuir el endeudamiento, lo que disminuye el ROE"],
+        correct: 0
+    },
+    {
+        id: 44,
+        text: "Qué hay que hacer si el ROA es menor que el tipo de interes de la deuda",
+        options: ["Disminuir el endeudamiento, lo que aumenta el ROE", "Aumentar el endeudamiento, lo que aumenta el ROE", "Aumentar el endeudamiento, lo que disminuye el ROE", "Disminuir el endeudamiento, lo que disminuye el ROE"],
+        correct: 0
+    },
+    {
+        id: 45,
+        text: "Qué fuentes de financiación hay",
+        options: ["Capital social, Autofinanciación y Deuda", "Solo capital social y deuda", "Créditos bancarios y donaciones", "Inversión externa y créditos privados"],
+        correct: 0
+    },
+    {
+        id: 46,
+        text: "Cómo se considera el capital social",
+        options: ["Financiación propia y externa", "Financiación propia e interna", "Financiación ajena y externa", "Financiación ajena e interna"],
+        correct: 0
+    },
+    {
+        id: 47,
+        text: "Cómo se calcula en una acción el valor nominal",
+        options: ["Capital / Nº de acciones", "Patrimonio neto / Nº de acciones", "Valor que tiene cuando se lanzan", "Valor en la bolsa"],
+        correct: 0
+    },
+    {
+        id: 48,
+        text: "Cómo se calcula en una acción el valor teórico",
+        options: ["Patrimonio neto / Nº de acciones", "Capital / Nº de acciones", "Valor que tiene cuando se lanzan", "Valor en la bolsa"],
+        correct: 0
+    },
+    {
+        id: 49,
+        text: "Cómo se calcula en una acción el valor real",
+        options: ["Valor en la bolsa", "Patrimonio neto / Nº de acciones", "Capital / Nº de acciones", "Valor que tiene cuando se lanzan"],
+        correct: 0
+    },
+    {
+        id: 50,
+        text: "Cómo se calcula en una acción el valor de emisión",
+        options: ["Valor que tiene cuando se lanzan", "Patrimonio neto / Nº de acciones", "Capital / Nº de acciones", "Valor en la bolsa"],
+        correct: 0
+    },
+    {
+        id: 51,
+        text: "Qué derechos dan las acciones a sus poseedores",
+        options: ["Económicos y políticos", "Económicos", "Políticos", "Ninguno"],
+        correct: 0
+    },
+    {
+        id: 52,
+        text: "Qué es la capitalización bursatil",
+        options: ["El precio que habría que pagar para comprar la empresa entera", "La variabilidad del valor teórico de las acciones", "La variabilidad del valor nominal de las acciones", "VR/VT"],
+        correct: 0
+    },
+    {
+        id: 53,
+        text: "Qué es el precio / valor contable",
+        options: ["VR/VT", "VR/Beneficio por acción", "Dividendos/Acción", "Dividendo por acción/VR"],
+        correct: 0
+    },
+    {
+        id: 54,
+        text: "Qué es el precio/beneficio",
+        options: ["VR/Beneficio por acción", "VR/VT", "Dividendos/Acción", "Dividendo por acción/VR"],
+        correct: 0
+    },
+    {
+        id: 55,
+        text: "Qué es el dividendo por acción",
+        options: ["Dividendos/Acción", "VR/Beneficio por acción", "VR/VT", "Dividendo por acción/VR"],
+        correct: 0
+    },
+    {
+        id: 56,
+        text: "Qué es la rentabilidad por dividendo",
+        options: ["Dividendo por acción/VR", "VR/Beneficio por acción", "VR/VT", "Dividendos/Acción"],
+        correct: 0
+    },
+    {
+        id: 57,
+        text: "Una ampliación de capital amplia el activo?",
+        options: ["Depende de si es por socios o por conversión de reservas", "Depende de si es por Nº de acciones o por aumento del VN", "Siempre", "Nunca"],
+        correct: 0
+    },
+    {
+        id: 58,
+        text: "Qué varía en una ampliacion de capital por aumento del VN",
+        options: ["El VN y el VT", "Sólo el VN", "El VT", "El nº de acciones"],
+        correct: 0
+    },
+    {
+        id: 59,
+        text: "Qué es la prima de emisión",
+        options: ["El precio pagado en una ampliación de capital que son reservas", "El porcentaje de ganancia en una emisión de acciones", "La diferencia entre el valor nominal y el valor de mercado", "El impuesto sobre la emisión de nuevas acciones"],
+        correct: 0
+    },
+    {
+        id: 60,
+        text: "Cual es la proporción de la ampliación",
+        options: ["Acciones antiguas / Acciones nuevas", "Acciones nuevas / Acciones totales", "Acciones nuevas / Acciones antiguas", "Acciones totales / Acciones antiguas"],
+        correct: 0
+    },
+    {
+        id: 61,
+        text: "Qué significa la dilución de las acciones",
+        options: ["La reducción del valor teórica de las acciones tras una ampliación de capital", "El aumento del valor teórico tras nuevas emisiones", "La suma del patrimonio neto con nuevas acciones", "El cambio de poder de voto de accionistas"],
+        correct: 0
+    },
+    {
+        id: 62,
+        text: "Qué efecto tiene una ampliación de capital por aportación de socios en los antiguos socios",
+        options: ["Depende de si ejerce su derecho de compra", "Pierde poder económico", "Pierde poder en el accionariado", "Pierde poder de ambos"],
+        correct: 0
+    },
+    {
+        id: 63,
+        text: "Qué consigue una ampliación de capital con cargo a reservas",
+        options: ["Una redistribución del patrimonio neto", "Unas mayores reservas", "Un mayor patrimonio neto", "Un mayor activo"],
+        correct: 0
+    },
+    {
+        id: 64,
+        text: "Qué consigue una ampliación de capital por conversión de deudas",
+        options: ["Un mayor patrimonio neto", "Un mayor pasivo", "Un mayor activo", "Unas mayores reservas"],
+        correct: 0
+    },
+    {
+        id: 65,
+        text: "Qué es la cibernética",
+        options: ["La ciencia del control y la comunicación en el animal y en la máquina", "La ciencia que estudia los sistemas informáticos", "El estudio de máquinas y robots", "La automatización de procesos empresariales"],
+        correct: 0
+    },
+    {
+        id: 66,
+        text: "Qué es la cibernética organizacional",
+        options: ["La aplicación de la cibernética a la dirección de organizaciones", "La aplicación de sistemas cibernéticos a máquinas industriales", "El control automático de máquinas en la empresa", "La transformación digital de organizaciones"],
+        correct: 0
+    },
+    {
+        id: 67,
+        text: "Qué es la viabilidad",
+        options: ["La capacidad de un sistema de mantener su existencia por si mismo", "La capacidad de adaptar su estructura organizativa", "La capacidad de tomar decisiones autónomamente", "La capacidad de generar ingresos suficientes"],
+        correct: 0
+    },
+    {
+        id: 68,
+        text: "Qué es la complejidad",
+        options: ["La cualidad de un sistema de adoptar estados diferentes", "La capacidad de una organización de crecer indefinidamente", "La dificultad para entender un sistema", "La flexibilidad de cambiar de mercado"],
+        correct: 0
+    },
+    {
+        id: 69,
+        text: "Qué es la variedad",
+        options: ["El número de estados posibles de un sistema", "La cantidad de empleados en una organización", "La diversidad de productos de una empresa", "La amplitud del mercado donde opera"],
+        correct: 0
+    },
+    {
+        id: 70,
+        text: "Cuál es el principio fundamental de la cibernética",
+        options: ["Para que un sistema sea viable ha de ser capaz de controlar la variedad del sistema en el que opera", "Para que un sistema sobreviva necesita capital suficiente", "Para que un sistema prospere ha de invertir en tecnología", "Para que un sistema funcione debe tener más empleados"],
+        correct: 0
+    },
+    {
+        id: 71,
+        text: "Qué establece la ley de Ashby",
+        options: ["Sólo la variedad destruye la variedad", "La energía ni se crea ni se destruye", "Todo sistema tiende al caos sin intervención", "A mayor riesgo, mayor rentabilidad"],
+        correct: 0
+    },
+    {
+        id: 72,
+        text: "Qué es la dimensión vertical",
+        options: ["Descomponer el entorno en sub-entornos", "Separar la organización en departamentos funcionales", "Crear subunidades de negocio independientes", "Dividir el mercado en segmentos diferentes"],
+        correct: 0
+    },
+    {
+        id: 73,
+        text: "Qué es la dimensión horizontal",
+        options: ["Tratar la variedad de los elementos de cada nivel de resursión", "Tratar la variedad del entorno externo", "Gestionar la diversidad de empleados en cada nivel", "Coordinar los diferentes departamentos horizontalmente"],
+        correct: 0
+    },
+    {
+        id: 74,
+        text: "Qué es no utilizar ciertos distribuidores",
+        options: ["Atenuador de variedad del entorno", "Atenuador de variedad de la organización", "Amplificador de variedad de la organización", "Amplificador de variedad de la dirección"],
+        correct: 0
+    },
+    {
+        id: 75,
+        text: "Qué es hacer controles no previstos",
+        options: ["Atenuador de variedad de la organización", "Atenuador de variedad del entorno", "Amplificador de variedad de la organización", "Amplificador de variedad de la dirección"],
+        correct: 0
+    },
+    {
+        id: 76,
+        text: "Qué es subcontratar",
+        options: ["Amplificador de variedad de la organización", "Atenuador de variedad de la organización", "Atenuador de variedad del entorno", "Amplificador de variedad de la dirección"],
+        correct: 0
+    },
+    {
+        id: 77,
+        text: "Qué es contratar consultoria externa",
+        options: ["Amplificador de variedad de la dirección", "Atenuador de variedad de la organización", "Atenuador de variedad del entorno", "Amplificador de variedad de la organización"],
+        correct: 0
+    },
+    {
+        id: 78,
+        text: "Qué sistema es responsable de hacer lo que hay que hacer",
+        options: ["S1", "S3", "S3*", "S4"],
+        correct: 0
+    },
+    {
+        id: 79,
+        text: "Qué sistema es responsable de diseñar el S1 y ordenar lo que debe hacer",
+        options: ["S3", "S3*", "S2", "S4"],
+        correct: 0
+    },
+    {
+        id: 80,
+        text: "Qué sistema es responsable de lograr gran parte de la coordinación del S1",
+        options: ["S2", "S3*", "S2", "S5"],
+        correct: 0
+    },
+    {
+        id: 81,
+        text: "Qué sistema es responsable de que el S3 tenga información completa del S1",
+        options: ["S3*", "S3", "S1", "S5"],
+        correct: 0
+    },
+    {
+        id: 82,
+        text: "Qué sistema es responsable de que la organización permanezca en el futuro",
+        options: ["S4", "S3", "S1", "S5"],
+        correct: 0
+    },
+    {
+        id: 83,
+        text: "Qué sistema es la máxima autoridad de la organización",
+        options: ["S5", "S2", "S4", "S3"],
+        correct: 0
+    },
+    {
+        id: 84,
+        text: "Qué se consideran las uu.oo.",
+        options: ["Atenuador de variedad de la organización", "Atenuador de variedad del entorno", "Amplificador de variedad de la organización", "Amplificador de variedad de la dirección"],
+        correct: 0
+    },
+    {
+        id: 85,
+        text: "Qué sistema es considerado \"El Jefe\"",
+        options: ["S3", "S5", "S4", "S1"],
+        correct: 0
+    },
+    {
+        id: 86,
+        text: "Qué sistema se ocupa de la \"Dirección operativa\"",
+        options: ["S3", "S4", "S5", "S1"],
+        correct: 0
+    },
+    {
+        id: 87,
+        text: "Qué logra un buen diseño cibernético",
+        options: ["Intervención reducida del S3 en el S1", "Poca necesidad de información del S3*", "Poca intervención del S5", "No hay discrepancias entre S4 y S5"],
+        correct: 0
+    },
+    {
+        id: 88,
+        text: "Tiene el S2 autoridad sobre el S1?",
+        options: ["No", "Sí", "Depende del tipo de organización", "Sí, pero no sobre las Direcciones locales de las uu.oo"],
+        correct: 0
+    },
+    {
+        id: 89,
+        text: "Qué se considera el S3*",
+        options: ["Amplificador de variedad del S3 y atenuador de variedad del S1", "Amplificador de variedad de S3 y S1", "Atenuador de variedad de S3 y S1", "Atenuador de variedad de S3 y amplificador de variedad de S1"],
+        correct: 0
+    },
+    {
+        id: 90,
+        text: "Debe pasar el S3* por las Direcciones locales de las uu.oo.",
+        options: ["No", "Debe hacerlo para conseguir la información", "No debe conseguir información de las uu.oo.", "Sí"],
+        correct: 0
+    },
+    {
+        id: 91,
+        text: "Qué sistema se ocupa de la \"Dirección estratégica\"",
+        options: ["S4", "S5", "S1", "S3"],
+        correct: 0
+    },
+    {
+        id: 92,
+        text: "Tiene el S4 autoridad sobre el S3?",
+        options: ["No", "Sí, siempre", "Sí, pero solo en ciertos casos", "Depende del tipo de organización"],
+        correct: 0
+    },
+    {
+        id: 93,
+        text: "De donde proviene la información del canal algedónico",
+        options: ["De todos lados", "Del S3*, porque es el que recopila la información", "Del S3", "Del S2, porque es el que recopila la información"],
+        correct: 0
+    },
+    {
+        id: 94,
+        text: "Qué sistema se ocupa de la \"Dirección identitaria\"",
+        options: ["S5", "S3", "S4", "S1"],
+        correct: 0
+    },
+    {
+        id: 95,
+        text: "De quién necesita información el S1",
+        options: ["Del S3, S2, S1 y el entorno", "Del S3 y S1", "Del S3, S5 y el entorno", "Del S1, S2, S3*, S4 y S5"],
+        correct: 0
+    },
+    {
+        id: 96,
+        text: "De quién necesita información el S3",
+        options: ["Del S1, S2, S3*, S4 y S5", "De los stakeholders, S3 y S4", "Del S3, S2, S1 y el entorno", "Del S3 y S1"],
+        correct: 0
+    },
+    {
+        id: 97,
+        text: "De quién necesita información el S2",
+        options: ["Del S3 y S1", "Del S3, S5 y el entorno", "Del S3, S2, S1 y el entorno", "Del S1, S2, S3*, S4 y S5"],
+        correct: 0
+    },
+    {
+        id: 98,
+        text: "De quién necesita información el S3*",
+        options: ["Del S3 y S1", "Del S3, S2, S1 y el entorno", "Del S1, S2, S3*, S4 y S5", "Del S3, S5 y el entorno"],
+        correct: 0
+    },
+    {
+        id: 99,
+        text: "De quién necesita información el S4",
+        options: ["Del S3, S5 y el entorno", "De los stakeholders, S3 y S4", "Del S3 y S1", "Del S1, S2, S3*, S4 y S5"],
+        correct: 0
+    },
+    {
+        id: 100,
+        text: "De quién necesita información el S5",
+        options: ["De los stakeholders, S3 y S4", "Del S3, S5 y el entorno", "Del S3 y S1", "Del S1, S2, S3*, S4 y S5"],
+        correct: 0
+    },
+    {
+        id: 101,
+        text: "A quién corresponde abordar las actividades y funciones asociadas al enfoque de desarrollo y las fases del ciclo de vida del proyecto",
+        options: ["Dominio de desempeño del desarrollo y ciclo de vida", "Dominio de desempeño de la planificación", "Dominio de desempeño de los interesados", "Dominio de desempeño de la medición"],
+        correct: 0
+    },
+    {
+        id: 102,
+        text: "A quién corresponde abordar las actividades y funciones de las personas responsables de crear los entregables del proyecto",
+        options: ["Dominio de desempeño del equipo", "Dominio de desempeño del desarrollo y ciclo de vida", "Dominio de desempeño de la medición", "Dominio de desempeño del proyecto"],
+        correct: 0
+    },
+    {
+        id: 103,
+        text: "A quién corresponde abordar las actividades y funciones asociadas con la organización y coordinación iniciales, continuas y en evolución, necesarias para la entrega de los entregables y resultados",
+        options: ["Dominio de desempeño de la planificación", "Dominio de desempeño de los interesados", "Dominio de desempeño de la entrega", "Dominio de desempeño del proyecto"],
+        correct: 0
+    },
+    {
+        id: 104,
+        text: "A quién corresponde abordar las actividades y funciones asociadas con los interesados",
+        options: ["Dominio de desempeño de los interesados", "Dominio de desempeño del equipo", "Dominio de desempeño del desarrollo y ciclo de vida", "Dominio de desempeño de la entrega"],
+        correct: 0
+    },
+    {
+        id: 105,
+        text: "A quién corresponde abordar las actividades y funciones relacionadas con la entrega del alcance según los requisitos y las expectativas de calidad de los entregables",
+        options: ["Dominio de desempeño de la entrega", "Dominio de desempeño del desarrollo y ciclo de vida", "Dominio de desempeño de la incertidumbre", "Dominio de desempeño del proyecto"],
+        correct: 0
+    },
+    {
+        id: 106,
+        text: "A quién corresponde abordar las actividades y funciones asociadas con el riesgo y la incertidumbre",
+        options: ["Dominio de desempeño de la incertidumbre", "Dominio de desempeño del equipo", "Dominio de desempeño de la entrega", "Dominio de desempeño del proyecto"],
+        correct: 0
+    },
+    {
+        id: 107,
+        text: "A quién corresponde abordar las actividades y funciones asociadas con la evolución del desempeño de los proyectos y la adopción de medidas apropiadas para mantener un desempeño aceptable",
+        options: ["Dominio de desempeño de la medición", "Dominio de desempeño de la planificación", "Dominio de desempeño de los interesados", "Dominio de desempeño de la incertidumbre"],
+        correct: 0
+    },
+    {
+        id: 108,
+        text: "A quién corresponde abordar las actividades y funciones asociadas con el establecimiento de los procesos del proyecto, la gestión de los recursos físicos y el fomento de un entorno de aprendizaje",
+        options: ["Dominio de desempeño del proyecto", "Dominio de desempeño del equipo", "Dominio de desempeño de la incertidumbre", "Dominio de desempeño de la medición"],
+        correct: 0
+    },
+    {
+        id: 109,
+        text: "Cuál de estos NO es un tipo de enfoque",
+        options: ["Mixto", "Predictivo", "Adaptativo", "Híbrido"],
+        correct: 0
+    },
+    {
+        id: 110,
+        text: "Qué documento se encarga de proporcionar una linea de tiempo que describe hitos",
+        options: ["Hoja de Ruta", "Acta de constitución"],
+        correct: 0
+    },
+    {
+        id: 111,
+        text: "Cuál de estos NO es tipo de Dirección y Liderazgo",
+        options: ["Sistemático", "Centralizados", "Distribuidos", "Liderazgo de Servicio"],
+        correct: 0
+    },
+    {
+        id: 112,
+        text: "Qué documento se encarga de representar jerárquicamente la disposición de roles y funciones",
+        options: ["Estructura Organizativa del Equipo de Proyecto", "Cronograma del Proyecto", "Matriz de Asignación de Responsabilidades", "Plan de Gestión del Alcance"],
+        correct: 0
+    },
+    {
+        id: 113,
+        text: "Qué variables influyen en la planificación del proyecto",
+        options: ["Enfoque de desarrollo, entregables, requisitos organizacionales, condiciones del mercado y restricciones legales", "Solo requisitos organizacionales", "Solo condiciones del mercado", "Solo restricciones legales"],
+        correct: 0
+    },
+    {
+        id: 114,
+        text: "Qué efecto tiene dejar las decisiones importantes para el final",
+        options: ["Evita trabajar en planes innecesarios", "Evita trabajar en planes innecesarios", "Reduce costos de planificación", "Facilita la adaptación rápida"],
+        correct: 0
+    },
+    {
+        id: 115,
+        text: "Qué documento autoriza formalmente la existencia del proyecto",
+        options: ["Acta de constitución", "Plan de Gestión del Alcance", "Hoja de ruta", "Plan de Gestión del Cronograma"],
+        correct: 0
+    },
+    {
+        id: 116,
+        text: "Quién genera el acta de constitución",
+        options: ["Generalmente el patrocinador del proyecto, aunque en ocasiones el director del proyecto", "Generalmente el director del proyecto, aunque en ocasiones el patrocinador del proyecto", "Siempre el director del proyecto", "Siempre el patrocinador del proyecto"],
+        correct: 0
+    },
+    {
+        id: 117,
+        text: "Qué información NO debe contener el acta de constitución",
+        options: ["Linea base de costes", "Objetivos y criterios de éxito", "Riesgos iniciales", "Cronograma de hitos"],
+        correct: 0
+    },
+    {
+        id: 118,
+        text: "En qué plan de gestión se encuadra la EDT",
+        options: ["Plan de Gestión del Alcance", "Plan de Gestión de las Adquisiciones", "Plan de Gestión del Cronograma", "Plan de Gestión de la Calidad"],
+        correct: 0
+    },
+    {
+        id: 119,
+        text: "Cuál NO es un requisito de la EDT",
+        options: ["No descomponer en más de 5 niveles", "Usar sustantivos para nombrar los paquetes", "No tener más de 9 elementos en un mismo nivel de desagregación", "Incluir siempre un paquete de gestión"],
+        correct: 0
+    },
+    {
+        id: 120,
+        text: "Cómo se llama a la secuencia de actividades críticas que van desde el comienzo al final del proyecto",
+        options: ["Camino crítico", "Diagrama de Gantt", "Cronograma", "Holgura"],
+        correct: 0
+    },
+    {
+        id: 121,
+        text: "Qué NO hay que tener en cuenta para la linea base de costes",
+        options: ["El enfoque", "La EDT", "El cronograma del proyecto", "Los recursos"],
+        correct: 0
+    },
+    {
+        id: 122,
+        text: "Cuál de estas NO es una técnica de estimación de costes",
+        options: ["Estimación descendente", "Estimación paramétrica", "Estimación por tres valores", "Métodos heurísticos"],
+        correct: 0
+    },
+    {
+        id: 123,
+        text: "Las personas, grupos u organizaciones que podrían afectar o ser afectados por una decisión son…",
+        options: ["Todas son correctas", "Stakeholders", "Interesados", "Partes involucradas"],
+        correct: 0
+    },
+    {
+        id: 124,
+        text: "Qué proceso pertenece al Dominio de Desempeño de los Interesados",
+        options: ["Plan de gestión de las Comunicaciones", "Plan de Gestión de las Adquisiciones", "Plan de Gestión del Cronograma", "Plan de Gestión de la Calidad"],
+        correct: 0
+    },
+    {
+        id: 125,
+        text: "Qué NO comprende la entrega",
+        options: ["Las comunicaciones", "La calidad", "Los resultados subóptimos", "La entrega de valor"],
+        correct: 0
+    },
+    {
+        id: 126,
+        text: "Qué NO comprende la incertidumbre",
+        options: ["Las comunicaciones", "La ambigüedad", "La volatilidad", "El riesgo"],
+        correct: 0
+    },
+    {
+        id: 127,
+        text: "Cuál de las siguientes NO es una respuesta a una amenaza",
+        options: ["Explotar", "Aceptar", "Escalar", "Transferir"],
+        correct: 0
+    },
+    {
+        id: 128,
+        text: "Cuál de las siguientes NO es una respuesta a una oportunidad",
+        options: ["Transferir", "Explotar", "Compartir", "Aceptar"],
+        correct: 0
+    },
+    {
+        id: 129,
+        text: "Qué reserva se aparta para hacer frente a los riesgos identificados",
+        options: ["La reserva de Contingencias", "La reserva de Gestión", "La reserva de Incertidumbre", "La reserva de Riesgos"],
+        correct: 0
+    },
+    {
+        id: 130,
+        text: "Qué tipo de respuestas actúan sobre el impacto del riesgo",
+        options: ["Respuestas de contención", "Respuestas anticipadas", "Respuestas proactivas", "Ninguna de las anteriores"],
+        correct: 0
+    },
+    {
+        id: 131,
+        text: "Qué criterios definen a un buen KPI",
+        options: ["Específico, Medible, Alcanzable, Realista, Limitado en tiempo", "Estratégico, Financiero, Largo plazo, Complejo", "Cualitativo, Subjetivo, Variable, Continuo", "General, Aproximado, Flexible, Idealista, Atemporal"],
+        correct: 0
+    },
+    {
+        id: 132,
+        text: "Cuál de estos NO se miden en el Dominio de Desempeño de la Medición",
+        options: ["Calidad", "Costo", "Equipo"],
+        correct: 0
+    },
+    {
+        id: 133,
+        text: "Qué indica un Índice de Eficiencia de Coste <1",
+        options: ["Se está gastando más dinero del planificado", "Se está gastando menos dinero del planificado", "El proyecto va adelantado", "El proyecto va retrasado"],
+        correct: 0
+    },
+    {
+        id: 134,
+        text: "Cuál puede ser el resultado de la Matriz de Asignación de Responsabilidades",
+        options: ["La matriz RACI", "La EDT", "El Plan de Gestión de las Adquisiciones", "Los KPIs"],
+        correct: 0
+    },
+    {
+        id: 135,
+        text: "Qué tipo de contrato beneficia al proveedor cuando el alcance está claro",
+        options: ["Contrato de precio fijo", "Contrato de coste reembolsable", "Contrato de incentivos y recompensas", "Contrato de tipo variable"],
+        correct: 0
+    },
+    {
+        id: 136,
+        text: "Qué tipo de contrato tiene más riesgo para el comprador",
+        options: ["Contrato de coste reembolsable", "Contrato de precio fijo", "Contrato de incentivos y recompensas", "Contrato de tipo variable"],
+        correct: 0
+    }
+];
+
+
+
+        // Estado
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let answeredQuestions = [];
+        let failedQuestions = [];
+        let quizMode = 'full'; // 'full' o 'failed'
+
+        // Persistencia de preguntas fallidas
+        function loadFailedQuestions() {
+            const stored = localStorage.getItem('failedQuestionsFOE');
+            if (stored) {
+                try {
+                    const ids = JSON.parse(stored);
+                    failedQuestions = questions.filter(q => ids.includes(q.id));
+                } catch (e) {
+                    console.error('Error leyendo failedQuestionsFOE', e);
+                    failedQuestions = [];
+                }
+            }
+        }
+
+        function saveFailedQuestions() {
+            const ids = failedQuestions.map(q => q.id);
+            localStorage.setItem('failedQuestionsFOE', JSON.stringify(ids));
+        }
+
+        function updateRetryFailedButton() {
+            const retryBtn = document.getElementById('retryFailedBtn');
+            if (!retryBtn) return;
+            if (failedQuestions.length === 0) {
+                retryBtn.disabled = true;
+                retryBtn.style.opacity = '0.5';
+                retryBtn.style.cursor = 'not-allowed';
+            } else {
+                retryBtn.disabled = false;
+                retryBtn.style.opacity = '1';
+                retryBtn.style.cursor = 'pointer';
+            }
+        }
+
+        // Mezcla (Fisher–Yates)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function getCurrentQuestions() {
+            return quizMode === 'failed' ? failedQuestions : questions;
+        }
+
+        function startQuiz() {
+    quizMode = 'full';
+    currentQuestionIndex = 0;
+    score = 0;
+    answeredQuestions = [];
+
+    // Barajamos el array de preguntas para este intento
+    // OJO: no modificamos el array original "questions", sino que
+    // creamos una copia barajada y la guardamos en una variable de sesión.
+    window.currentQuestionOrder = shuffleArray(questions);
+
+    document.getElementById('quizMode').textContent = 'Quiz Completo';
+    document.getElementById('homeScreen').classList.add('hidden');
+    document.getElementById('resultsScreen').classList.add('hidden');
+    document.getElementById('quizScreen').classList.remove('hidden');
+
+    showQuestion();
+}
+
+
+        function showFailedOnly() {
+    if (failedQuestions.length === 0) {
+        alert('No hay preguntas fallidas aún. ¡Completa y falla alguna primero 😈!');
+        return;
+    }
+
+    quizMode = 'failed';
+    currentQuestionIndex = 0;
+    score = 0;
+    answeredQuestions = [];
+
+    // Barajar solo las fallidas para este intento
+    window.currentQuestionOrder = shuffleArray(failedQuestions);
+
+    document.getElementById('quizMode').textContent = 'Preguntas Fallidas';
+    document.getElementById('homeScreen').classList.add('hidden');
+    document.getElementById('resultsScreen').classList.add('hidden');
+    document.getElementById('quizScreen').classList.remove('hidden');
+
+    showQuestion();
+}
+
+
+        function showQuestion() {
+           const questionList = window.currentQuestionOrder || getCurrentQuestions();
+
+    if (currentQuestionIndex >= questionList.length) {
+        showResults();
+        return;
+    }
+
+            const question = questionList[currentQuestionIndex];
+
+            // Mezclar opciones guardando índice correcto
+            const shuffledOptions = shuffleArray(question.options);
+            const correctIndex = shuffledOptions.indexOf(question.options[question.correct]);
+            question.correctIndex = correctIndex;
+
+            document.getElementById('questionText').textContent = question.text;
+            document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+            document.getElementById('totalQuestions').textContent = questionList.length;
+
+            const feedbackEl = document.getElementById('feedback');
+            feedbackEl.className = 'feedback';
+            feedbackEl.textContent = '';
+
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+
+            shuffledOptions.forEach((option, index) => {
+                const label = document.createElement('label');
+                label.className = 'option';
+                label.innerHTML = `
+                    <input type="radio" name="answer" value="${index}" ${index === correctIndex ? 'data-correct="true"' : ''}>
+                    ${option}
+                `;
+                label.addEventListener('click', () => {
+                    document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+                    label.classList.add('selected');
+                });
+                optionsContainer.appendChild(label);
+            });
+
+            document.getElementById('submitBtn').style.display = 'inline-block';
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function submitAnswer() {
+            const questionList = window.currentQuestionOrder || getCurrentQuestions();
+            const question = questionList[currentQuestionIndex];
+            const selected = document.querySelector('input[name="answer"]:checked');
+
+            if (!selected) {
+                alert('Por favor, selecciona una respuesta.');
+                return;
+            }
+
+            const selectedValue = parseInt(selected.value, 10);
+            const isCorrect = selectedValue === question.correctIndex;
+
+            answeredQuestions.push({
+                questionId: question.id,
+                questionText: question.text,
+                isCorrect: isCorrect,
+                selectedOption: question.options[selectedValue] ?? 'N/D',
+                correctOption: question.options[question.correct]
+            });
+
+            const feedbackEl = document.getElementById('feedback');
+
+               if (isCorrect) {
+        // Sumamos punto
+        score++;
+        feedbackEl.className = 'feedback show correct';
+        feedbackEl.textContent = '✓ ¡Correcto!';
+
+        // Si estaba en preguntas falladas, la quitamos
+        const beforeLength = failedQuestions.length;
+        failedQuestions = failedQuestions.filter(q => q.id !== question.id);
+        if (failedQuestions.length !== beforeLength) {
+            saveFailedQuestions();
+            updateRetryFailedButton();
+        }
+    } else {
+        feedbackEl.className = 'feedback show incorrect';
+        feedbackEl.textContent = '✗ Incorrecto. La respuesta correcta es: ' + question.options[question.correct];
+
+        // Si no estaba marcada como fallida, la añadimos
+        if (!failedQuestions.find(q => q.id === question.id)) {
+            failedQuestions.push(question);
+            saveFailedQuestions();
+            updateRetryFailedButton();
+        }
+    }
+
+
+            const correctInput = document.querySelector('[data-correct="true"]');
+            if (correctInput) {
+                correctInput.parentElement.classList.add('correct');
+            }
+            const selectedLabel = selected.parentElement;
+            if (!isCorrect) {
+                selectedLabel.classList.add('incorrect');
+            }
+
+            document.querySelectorAll('input[name="answer"]').forEach(i => i.disabled = true);
+
+            document.getElementById('submitBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function showResults() {
+            const questionList = getCurrentQuestions();
+            const total = questionList.length;
+            const percentage = total === 0 ? 0 : Math.round((score / total) * 100);
+
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.remove('hidden');
+
+            document.getElementById('scoreDisplay').textContent = `${score}/${total}`;
+            document.getElementById('scorePercentage').textContent = `${percentage}%`;
+            document.getElementById('correctCount').textContent = score;
+            document.getElementById('incorrectCount').textContent = total - score;
+            document.getElementById('successRate').textContent = `${percentage}%`;
+
+            const failedForThisRun = answeredQuestions.filter(a => !a.isCorrect);
+            const failedSection = document.getElementById('failedQuestionsSection');
+            const failedList = document.getElementById('failedQuestionsList');
+            failedList.innerHTML = '';
+
+            if (failedForThisRun.length > 0) {
+                failedSection.classList.remove('hidden');
+                failedForThisRun.forEach(f => {
+                    const item = document.createElement('div');
+                    item.className = 'failed-question-item';
+                    item.innerHTML = `
+                        <div class="failed-question-text">${f.questionText}</div>
+                        <div class="failed-question-answer">
+                            <strong>Tu respuesta:</strong> ${f.selectedOption}<br>
+                            <strong>Respuesta correcta:</strong> ${f.correctOption}
+                        </div>
+                    `;
+                    failedList.appendChild(item);
+                });
+                document.getElementById('retryFailedQuizBtn').style.display = 'inline-block';
+            } else {
+                failedSection.classList.add('hidden');
+                document.getElementById('retryFailedQuizBtn').style.display = 'none';
+            }
+        }
+
+        function backHome() {
+            document.getElementById('homeScreen').classList.remove('hidden');
+            document.getElementById('quizScreen').classList.add('hidden');
+            document.getElementById('resultsScreen').classList.add('hidden');
+            currentQuestionIndex = 0;
+            score = 0;
+            answeredQuestions = [];
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFailedQuestions();
+            updateRetryFailedButton();
+        });
+    </script>
+</body>
+</html>
